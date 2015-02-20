@@ -16,6 +16,8 @@ package com.google.api.client.http.apache;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -25,9 +27,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-
 /**
  * Implementation of SSL socket factory that extends Apache's implementation to provide
  * functionality missing from the Android SDK that is available in Apache HTTP Client.
@@ -35,6 +34,7 @@ import javax.net.ssl.SSLSocket;
  * @author Yaniv Inbar
  */
 final class SSLSocketFactoryExtension extends SSLSocketFactory {
+  private static final int SSL_SOCKET_TIMEOUT = 20000;
 
   /** Wrapped Java SSL socket factory. */
   private final javax.net.ssl.SSLSocketFactory socketFactory;
@@ -57,6 +57,7 @@ final class SSLSocketFactoryExtension extends SSLSocketFactory {
   public Socket createSocket(Socket socket, String host, int port, boolean autoClose)
       throws IOException, UnknownHostException {
     SSLSocket sslSocket = (SSLSocket) socketFactory.createSocket(socket, host, port, autoClose);
+    sslSocket.setSoTimeout(SSL_SOCKET_TIMEOUT);
     getHostnameVerifier().verify(host, sslSocket);
     return sslSocket;
   }
